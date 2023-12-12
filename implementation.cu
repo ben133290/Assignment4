@@ -51,6 +51,7 @@ __global__ void kernel(double *input, double *output, int length) {
     // Calculate global indices
     int i = blockIdx.y * blockDim.y + threadIdx.y;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
+    
 
     if (i > 0 && i < length - 1 && j > 0 && j < length - 1) {
         // Compute the convolution
@@ -62,6 +63,16 @@ __global__ void kernel(double *input, double *output, int length) {
     }
 
     // Set special values
+    int m = length/2;
+    if (threadIdx.x == 0 && threadIdx.y == 0) {
+        output[m * length + m] = 1000.0;
+        output[(m-1) * length + m] = 1000.0;
+        output[(m-1) * length + m-1] = 1000.0;
+        output[m * length + m-1] = 1000.0;
+    }
+
+
+    /*
     if (i == length / 2 - 1 && j == length / 2 - 1)
         output[i * length + j] = 1000.0;
 
@@ -73,6 +84,8 @@ __global__ void kernel(double *input, double *output, int length) {
 
     if (i == length / 2 && j == length / 2)
         output[i * length + j] = 1000.0;
+        */
+    
 }
 
 
@@ -105,8 +118,10 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventRecord(comp_start);
 
     /* GPU calculation goes here */
-    dim3 threadsPerBlock(4, 4);
-    dim3 numOfBlocks(64/4, 64/4);
+    dim3 threadsPerBlock(32, 32);
+    int blockSide = length/32;
+    if (length % 32 != 0) {blockSide++;}
+    dim3 numOfBlocks(length/32 + 1, length/32 + 1);
     for (int n = 0; n < iterations; n++) {
 
         kernel<<<numOfBlocks, threadsPerBlock>>>(gpu_input, gpu_output, length);

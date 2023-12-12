@@ -60,7 +60,8 @@ int main (int argc, const char *argv[]) {
         temp = input;
         input = output;
         output = temp;
-    }*/
+    }
+    */
 
     //GPU function
     GPU_array_process(input, output, length, iterations);

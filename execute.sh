@@ -11,8 +11,8 @@
 #SBATCH --account cs307
 #SBATCH --reservation cs307-weekly-gpu
 
-length=64
-iterations=4
+length=1000
+iterations=5000
 
 module load gcc cuda
 

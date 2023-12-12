@@ -1,0 +1,14 @@
+
+Lmod is automatically replacing "intel/2021.6.0" with "gcc/11.3.0".
+
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) cuda/11.8.0     2) libxml2/2.9.13     3) zlib/1.2.12
+
+STARTING AT Tue Dec 12 19:04:53 CET 2023
+nvcc -Wno-deprecated-gpu-targets -lcudart -lcuda assignment4.o implementation.o -o assignment4
+Host to Device MemCpy takes 0.00182s
+Computation takes 0.1291s
+Device to Host MemCpy takes 0.001879s
+Running the algorithm on 1000 by 1000 array for 5000 iteration takes 0.2541s
+FINISHED at Tue Dec 12 19:04:54 CET 2023
