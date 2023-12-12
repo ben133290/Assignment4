@@ -1,0 +1,3 @@
+#SBATCH --account cs307
+#SBATCH --reservation CS307-gpu
+cs307-weekly-gpu

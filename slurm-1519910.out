@@ -1,0 +1,14 @@
+
+Lmod is automatically replacing "nvhpc/23.3-mpi" with "gcc/11.3.0".
+
+
+Due to MODULEPATH changes, the following have been reloaded:
+  1) cuda/11.8.0
+
+STARTING AT Mon Dec 11 14:53:41 CET 2023
+nvcc -Wno-deprecated-gpu-targets -lcudart -lcuda assignment4.o implementation.o -o assignment4
+Host to Device MemCpy takes 2.662e-05s
+Computation takes 2.352e-05s
+Device to Host MemCpy takes 2.022e-05s
+Running the algorithm on 50 by 50 array for 1 iteration takes 0.1528s
+FINISHED at Mon Dec 11 14:53:42 CET 2023
