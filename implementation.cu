@@ -46,47 +46,33 @@ void array_process(double *input, double *output, int length, int iterations)
     }
 }
 
+__constant__ int m0;
+__constant__ int m1;
+__constant__ int m2;
+__constant__ int m3;
+
 // GPU Optimized function
 __global__ void kernel(double *input, double *output, int length) {
+    // Shared memory declaration
+    __shared__ double shared_input[1024];
+
     // Calculate global indices
     int i = blockIdx.y * blockDim.y + threadIdx.y;
     int j = blockIdx.x * blockDim.x + threadIdx.x;
-    
+    int c = i * length + j;
 
-    if (i > 0 && i < length - 1 && j > 0 && j < length - 1) {
+    if (i > 0 && i < length - 1 && j > 0 && j < length - 1 && c != m0 && c != m1 && c != m2 && c != m3) {
         // Compute the convolution
-        output[i * length + j] =
+        output[c] =
             (input[(i - 1) * length + (j - 1)] + input[(i - 1) * length + j] + input[(i - 1) * length + (j + 1)] +
              input[i * length + (j - 1)] + input[i * length + j] + input[i * length + (j + 1)] +
              input[(i + 1) * length + (j - 1)] + input[(i + 1) * length + j] + input[(i + 1) * length + (j + 1)]) /
             9.0;
     }
-
-    // Set special values
-    int m = length/2;
-    if (threadIdx.x == 0 && threadIdx.y == 0) {
-        output[m * length + m] = 1000.0;
-        output[(m-1) * length + m] = 1000.0;
-        output[(m-1) * length + m-1] = 1000.0;
-        output[m * length + m-1] = 1000.0;
-    }
-
-
-    /*
-    if (i == length / 2 - 1 && j == length / 2 - 1)
-        output[i * length + j] = 1000.0;
-
-    if (i == length / 2 && j == length / 2 - 1)
-        output[i * length + j] = 1000.0;
-
-    if (i == length / 2 - 1 && j == length / 2)
-        output[i * length + j] = 1000.0;
-
-    if (i == length / 2 && j == length / 2)
-        output[i * length + j] = 1000.0;
-        */
-    
 }
+
+
+
 
 
 // GPU Optimized function
@@ -101,11 +87,31 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventCreate(&comp_start);
     cudaEventCreate(&comp_end);
 
+    // set special values
+    int m0v = (length/2-1)*length+(length/2-1);
+    int m1v = (length/2)*length+(length/2-1);
+    int m2v = (length/2-1)*length+(length/2);
+    int m3v = (length/2)*length+(length/2);
+    input[m0v] = 1000;
+    input[m1v] = 1000;
+    input[m2v] = 1000;
+    input[m3v] = 1000;
+
     /* Preprocessing goes here */
     double *gpu_input, *gpu_output;
     
     cudaMalloc((void**)&gpu_input, length * length * sizeof(double));
     cudaMalloc((void**)&gpu_output, length * length * sizeof(double));
+
+    cudaMemcpyToSymbol(m0, &m0v, sizeof(int));
+    cudaMemcpyToSymbol(m1, &m1v, sizeof(int));
+    cudaMemcpyToSymbol(m2, &m2v, sizeof(int));
+    cudaMemcpyToSymbol(m3, &m3v, sizeof(int));
+
+    dim3 threadsPerBlock(32, 32);
+    int blockSide = length/32;
+    if (length % 32 != 0) {blockSide++;}
+    dim3 numOfBlocks(blockSide, blockSide);
 
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
@@ -118,10 +124,6 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaEventRecord(comp_start);
 
     /* GPU calculation goes here */
-    dim3 threadsPerBlock(32, 32);
-    int blockSide = length/32;
-    if (length % 32 != 0) {blockSide++;}
-    dim3 numOfBlocks(length/32 + 1, length/32 + 1);
     for (int n = 0; n < iterations; n++) {
 
         kernel<<<numOfBlocks, threadsPerBlock>>>(gpu_input, gpu_output, length);

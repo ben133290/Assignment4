@@ -1,3 +1,31 @@
 #SBATCH --account cs307
 #SBATCH --reservation CS307-gpu
 cs307-weekly-gpu
+
+
+__global__ void kernel2(double *input, double *output, int length) {
+    // Declare shared memory
+    __shared__ double s_input[1000000];
+
+    // Calculate global indices
+    int i = blockIdx.y * blockDim.y + threadIdx.y;
+    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int c = i * length + j;
+
+    // Load data into shared memory
+    if (i < length && j < length) {
+        s_input[threadIdx.y][threadIdx.x] = input[c];
+    }
+    __syncthreads();
+
+    // Compute the convolution
+    if (i > 0 && i < length - 1 && j > 0 && j < length - 1 && c != m0 && c != m1 && c != m2 && c != m3) {
+
+        double sum = s_input[threadIdx.y - 1][threadIdx.x - 1] + s_input[threadIdx.y - 1][threadIdx.x] +
+                     s_input[threadIdx.y - 1][threadIdx.x + 1] + s_input[threadIdx.y][threadIdx.x - 1] +
+                     s_input[threadIdx.y][threadIdx.x] + s_input[threadIdx.y][threadIdx.x + 1] +
+                     s_input[threadIdx.y + 1][threadIdx.x - 1] + s_input[threadIdx.y + 1][threadIdx.x] +
+                     s_input[threadIdx.y + 1][threadIdx.x + 1];
+        output[c] = sum / 9.0;
+    }
+}
