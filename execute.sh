@@ -9,7 +9,6 @@
 #SBATCH --cpus-per-task=1
 #SBATCH --mem 1G
 #SBATCH --account cs307
-#SBATCH --reservation cs307-sat1-gpu
 
 length=1000
 iterations=5000

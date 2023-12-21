@@ -53,15 +53,13 @@ __constant__ int m3;
 
 // GPU Optimized function
 __global__ void kernel(double *input, double *output, int length) {
-    // Shared memory declaration
-    __shared__ double shared_input[1024];
 
     // Calculate global indices
-    int i = blockIdx.y * blockDim.y + threadIdx.y;
-    int j = blockIdx.x * blockDim.x + threadIdx.x;
+    int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
+    int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
     int c = i * length + j;
 
-    if (i > 0 && i < length - 1 && j > 0 && j < length - 1 && c != m0 && c != m1 && c != m2 && c != m3) {
+    if (i < length - 1 && j < length - 1 && c != m0 && c != m1 && c != m2 && c != m3) {
         // Compute the convolution
         output[c] =
             (input[(i - 1) * length + (j - 1)] + input[(i - 1) * length + j] + input[(i - 1) * length + (j + 1)] +
