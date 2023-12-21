@@ -53,7 +53,6 @@ __constant__ int m3;
 
 // GPU Optimized function
 __global__ void kernel(double *input, double *output, int length) {
-
     // Calculate global indices
     int i = blockIdx.y * blockDim.y + threadIdx.y + 1;
     int j = blockIdx.x * blockDim.x + threadIdx.x + 1;
@@ -67,6 +66,8 @@ __global__ void kernel(double *input, double *output, int length) {
              input[(i + 1) * length + (j - 1)] + input[(i + 1) * length + j] + input[(i + 1) * length + (j + 1)]) /
             9.0;
     }
+
+
 }
 
 // GPU Optimized function
@@ -102,10 +103,12 @@ void GPU_array_process(double *input, double *output, int length, int iterations
     cudaMemcpyToSymbol(m2, &m2v, sizeof(int));
     cudaMemcpyToSymbol(m3, &m3v, sizeof(int));
 
-    dim3 threadsPerBlock(32, 32);
-    int blockSide = length/32;
-    if (length % 32 != 0) {blockSide++;}
-    dim3 numOfBlocks(blockSide, blockSide);
+    dim3 threadsPerBlock(1, 1024);
+    int blockSidex = length/threadsPerBlock.x;
+    if (length % threadsPerBlock.x != 0) {blockSidex++;}
+    int blockSidey = length/threadsPerBlock.y;
+    if (length % threadsPerBlock.y != 0) {blockSidey++;}
+    dim3 numOfBlocks(blockSidex, blockSidey);
 
     cudaEventRecord(cpy_H2D_start);
     /* Copying array from host to device goes here */
