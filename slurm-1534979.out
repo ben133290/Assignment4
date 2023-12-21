@@ -1,0 +1,7 @@
+STARTING AT Thu Dec 21 09:43:48 CET 2023
+nvcc -Wno-deprecated-gpu-targets -lcudart -lcuda assignment4.o implementation.o -o assignment4
+Host to Device MemCpy takes 0.001876s
+Computation takes 0.1294s
+Device to Host MemCpy takes 0.001853s
+Running the algorithm on 1000 by 1000 array for 5000 iteration takes 0.2176s
+FINISHED at Thu Dec 21 09:43:49 CET 2023

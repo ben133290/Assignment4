@@ -69,10 +69,6 @@ __global__ void kernel(double *input, double *output, int length) {
     }
 }
 
-
-
-
-
 // GPU Optimized function
 void GPU_array_process(double *input, double *output, int length, int iterations)
 {
